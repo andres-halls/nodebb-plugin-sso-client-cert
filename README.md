@@ -1,2 +1,3 @@
-# nodebb-plugin-sso-client-cert
-NodeBB Client Certificate SSO
+# NodeBB Client Certificate SSO
+
+NodeBB Plugin that allows users to login/register via a client certificate.
