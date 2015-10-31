@@ -1,0 +1,12 @@
+{
+  "id": "nodebb-plugin-sso-client-cert",
+  "name": "NodeBB Client Certificate SSO",
+  "description": "NodeBB Plugin that allows users to login/register via a client certificate.",
+  "url": "https://github.com/andres-liiver/nodebb-plugin-sso-client-cert",
+  "library": "./library.js",
+  "hooks": [
+    { "hook": "filter:auth.init", "method": "getStrategy" },
+    { "hook": "filter:auth.list", "method": "getAssociation" },
+    { "hook": "static:user.delete", "method": "deleteUserData" }
+  ]
+}
