@@ -11,14 +11,17 @@
     winston = module.parent.require('winston');
 
   var constants = Object.freeze({
-    'name': 'ClientCert',
+    'name': 'client-cert',
     'icon': 'icon-client-cert-auth'
   });
 
   var ClientCert = {};
 
   ClientCert.getStrategy = function(strategies, callback) {
-    passport.use(new passportClientCert({ passReqToCallback: true }, function(req, cert, done) {
+    passport.use(constants.name, new passportClientCert({
+        passReqToCallback: true,
+        renegotiation: true
+    }, function(req, cert, done) {
       var subject = cert.subject;
 
       if (!subject) {
@@ -49,11 +52,11 @@
     }));
 
     strategies.push({
-      name: 'ClientCert',
+      name: 'client-cert',
       url: '/auth/client-cert',
       callbackURL: '/auth/client-cert/callback',
       icon: constants.icon,
-      scope: 'email'
+      scope: ''
     });
 
     callback(null, strategies);
