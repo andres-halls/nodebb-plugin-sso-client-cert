@@ -34,7 +34,8 @@ NodeBB Plugin that allows users to login/register via a client certificate.
         You can add more CA certs and they will be concatenated in order.
     * Edit src/webserver.js.
         * Add the following after `cert: fs.readFileSync(nconf.get('ssl').cert)` where the https server is created.
-        `ca: nconf.get('ssl').ca.map(function(n) { return fs.readFileSync(n); })`
+        
+          `ca: nconf.get('ssl').ca.map(function(n) { return fs.readFileSync(n); })`
         
 3. Edit src/routes/authentication.js. Find the following code:
 
