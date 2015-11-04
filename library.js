@@ -15,13 +15,26 @@
     'icon': 'icon-client-cert-auth'
   });
 
+  var CA_CNs = ['ESTEID-SK 2007', 'ESTEID-SK 2011'];
+  // TODO: make a settings page in the Admin CP to configure these
+  // and success/failure URLs.
+
   var ClientCert = {};
 
   ClientCert.getStrategy = function(strategies, callback) {
     passport.use(constants.name, new passportClientCert({
         passReqToCallback: true,
-        renegotiation: true
+        renegotiation: true,
+        successReturnToOrRedirect: '/',
+        failureRedirect: '/client-cert-auth-error'
     }, function(req, cert, done) {
+      var issuer = cert.issuer;
+
+      if (CA_CNs.indexOf(issuer.CN) === -1) {
+        winston.error('[sso-client-cert] Client Certificate Issuer CN invalid: ' + issuer.CN);
+        return done(null, false);
+      }
+
       var subject = cert.subject;
 
       if (!subject) {
@@ -39,10 +52,12 @@
         return done(null, req.user);
       }
 
-      var name = subject.GN.charAt(0).toUpperCase() + subject.GN.slice(1).toLowerCase();
+      var firstName = subject.GN.charAt(0).toUpperCase() + subject.GN.slice(1).toLowerCase();
+      var lastName = subject.SN.charAt(0).toUpperCase() + subject.SN.slice(1).toLowerCase();
+      var userName = firstName + ' ' + lastName;
       var email = cert.subjectaltname.split('email:')[1];
 
-      ClientCert.login(subject.CN, name, email, function(err, user) {
+      ClientCert.login(subject.CN, userName, email, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -54,9 +69,8 @@
     strategies.push({
       name: 'client-cert',
       url: '/auth/client-cert',
-      callbackURL: '/auth/client-cert/callback',
-      icon: constants.icon,
-      scope: ''
+      callbackURL: '/',
+      icon: constants.icon
     });
 
     callback(null, strategies);
@@ -87,7 +101,7 @@
     })
   };
 
-  ClientCert.login = function(CN, name, email, callback) {
+  ClientCert.login = function(CN, userName, email, callback) {
     ClientCert.getUidByCertCN(CN, function(err, uid) {
       if(err) {
         return callback(err);
@@ -104,7 +118,7 @@
           // Save cert CN to the user
           user.setUserField(uid, 'certcn', CN);
           db.setObjectField('certcn:uid', CN, uid);
-          user.setUserField(uid, 'email:confirmed', 1);
+          user.setUserField(uid, 'email:confirmed', 0); // TODO: Add option to configure in Admin CP
 
           callback(null, {
             uid: uid
@@ -117,7 +131,7 @@
           }
 
           if (!uid) {
-            user.create({username: name, email: email}, function(err, uid) {
+            user.create({username: userName, email: email}, function(err, uid) {
               if(err) {
                 return callback(err);
               }
