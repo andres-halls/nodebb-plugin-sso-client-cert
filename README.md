@@ -4,7 +4,7 @@ NodeBB Plugin that allows users to login/register via a client certificate.
 
 ## Limitations
 
-* Requires modifying NodeBB code a bit in order to work.
+* Requires modifying NodeBB code a bit in order to work (one or two lines).
 * TLS termination must be done with Node.
 
 ## Installation
@@ -37,34 +37,10 @@ NodeBB Plugin that allows users to login/register via a client certificate.
         
           `ca: nconf.get('ssl').ca.map(function(n) { return fs.readFileSync(n); })`
         
-3. Edit src/routes/authentication.js. Find the following code:
-
-  ```javascript
-  if (strategy.url) {
-  	router.get(strategy.url, passport.authenticate(strategy.name, {
-  		scope: strategy.scope
-  	}));
-  }
-  ```
-Change it to:
-
-  ```javascript
-  if (strategy.url) {
-  	router.get(strategy.url, passport.authenticate(strategy.name, {
-  		scope: strategy.scope
-  	}), function(req, res, next) {
-  		if (strategy.name == 'client-cert') {
-  			res.redirect(strategy.callbackURL);
-  		} else {
-  			next();
-  		}
-  	});
-  }
-  ```
-4. Start NodeBB: `./nodebb start`
-5. Go to your Admin Control Panel (note that forum is accessed now by https and no port).
-6. Activate the plugin under Plugins -> Install Plugins.
-7. Set an icon (or text or something) for the login button by going to Appearance -> Custom HTML & CSS. Here's an example:
+3. Start NodeBB: `./nodebb start`
+4. Go to your Admin Control Panel (note that forum is accessed now by https and no port).
+5. Activate the plugin under Plugins -> Install Plugins.
+6. Set an icon (or text or something) for the login button by going to Appearance -> Custom HTML & CSS. Here's an example:
 
   ```CSS
   .icon-client-cert-auth:after {
@@ -77,5 +53,5 @@ Change it to:
     background-repeat: no-repeat;
   }
   ```
-8. (Optional) Disable user registration under Settings -> User by setting Registration type to No registration and disable local login.
-9. Reload the forum and test the new authentication.
+7. Use the [NodeBB Custom Pages plugin] (https://github.com/psychobunny/nodebb-plugin-custom-pages) to create an error page for the route `/client-cert-auth-error`
+8. Reload the forum and test the new authentication.
