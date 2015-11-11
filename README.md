@@ -37,6 +37,7 @@ NodeBB Plugin that allows users to login/register via a client certificate.
           `ca: nconf.get('ssl').ca.map(function(n) { return fs.readFileSync(n); })`
         
 2b. Configure Apache for TLS termination (if not using Node for it).
+
 3. Start NodeBB: `./nodebb start`
 4. Go to your Admin Control Panel (note that forum is accessed now by https and no port).
 5. Activate the plugin under Plugins -> Install Plugins.
