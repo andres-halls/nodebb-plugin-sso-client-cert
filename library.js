@@ -24,7 +24,6 @@
   ClientCert.getStrategy = function(strategies, callback) {
     passport.use(constants.name, new passportClientCert({
         passReqToCallback: true,
-        renegotiation: true,
         successReturnToOrRedirect: '/',
         failureRedirect: '/client-cert-auth-error'
     }, function(req, cert, done) {
