@@ -28,35 +28,43 @@
         failureRedirect: '/client-cert-auth-error'
     }, function(req, cert, done) {
       var issuer = cert.issuer;
+      var issuerCommonName = issuer.CN || issuer.commonName;
 
-      if (CA_CNs.indexOf(issuer.CN) === -1) {
-        winston.error('[sso-client-cert] Client Certificate Issuer CN invalid: ' + issuer.CN);
+      if (CA_CNs.indexOf(issuerCommonName) === -1) {
+        winston.error('[sso-client-cert] Client Certificate Issuer CN invalid: ' + issuerCommonName);
         return done(null, false);
       }
 
       var subject = cert.subject;
+      var subjectCommonName = subject.CN || subject.commonName;
 
       if (!subject) {
         winston.error('[sso-client-cert] Client Certificate Subject missing!');
         return done(null, false);
-      } else if (!subject.CN) {
+      } else if (!subjectCommonName) {
         winston.error('[sso-client-cert] Client Certificate CN missing!');
         return done(null, false);
       }
 
       if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
         // Save cert CN to the user
-        user.setUserField(req.user.uid, 'certcn', subject.CN);
-        db.setObjectField('certcn:uid', subject.CN, req.user.uid);
+        user.setUserField(req.user.uid, 'certcn', subjectCommonName);
+        db.setObjectField('certcn:uid', subjectCommonName, req.user.uid);
         return done(null, req.user);
       }
 
-      var firstName = subject.GN.charAt(0).toUpperCase() + subject.GN.slice(1).toLowerCase();
-      var lastName = subject.SN.charAt(0).toUpperCase() + subject.SN.slice(1).toLowerCase();
+      var subjectGivenName = subject.GN || subject.givenName;
+      var subjectSurname = subject.SN || subject.surname;
+      var firstName = subjectGivenName.charAt(0).toUpperCase() + subjectGivenName.slice(1).toLowerCase();
+      var lastName = subjectSurname.charAt(0).toUpperCase() + subjectSurname.slice(1).toLowerCase();
       var userName = firstName + ' ' + lastName;
-      var email = cert.subjectaltname.split('email:')[1];
+      var email = "";
 
-      ClientCert.login(subject.CN, userName, email, function(err, user) {
+      if (cert.subjectaltname) {
+        email = cert.subjectaltname.split('email:')[1];
+      }
+
+      ClientCert.login(subjectCommonName, userName, email, function(err, user) {
         if (err) {
           return done(err);
         }
