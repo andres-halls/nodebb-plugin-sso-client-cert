@@ -27,22 +27,22 @@
         successReturnToOrRedirect: '/',
         failureRedirect: '/client-cert-auth-error'
     }, function(req, cert, done) {
-      var issuer = cert.issuer;
-      var issuerCommonName = issuer.CN || issuer.commonName;
+      var issuer = cert.issuer ? cert.issuer : {CN: undefined};
+      var issuerCommonName = issuer.CN ? issuer.CN : req.headers.ssl_client_i_dn_cn;
 
       if (CA_CNs.indexOf(issuerCommonName) === -1) {
         winston.error('[sso-client-cert] Client Certificate Issuer CN invalid: ' + issuerCommonName);
         return done(null, false);
       }
 
-      var subject = cert.subject;
-      var subjectCommonName = subject.CN || subject.commonName;
+      var subject = cert.subject ? cert.subject : {CN: undefined, GN: undefined, SN: undefined};
+      var subjectCommonName = subject.CN ? subject.CN : req.headers.ssl_client_s_dn_cn;
 
       if (!subject) {
         winston.error('[sso-client-cert] Client Certificate Subject missing!');
         return done(null, false);
       } else if (!subjectCommonName) {
-        winston.error('[sso-client-cert] Client Certificate CN missing!');
+        winston.error('[sso-client-cert] Client Certificate Subject CN missing!');
         return done(null, false);
       }
 
@@ -53,8 +53,8 @@
         return done(null, req.user);
       }
 
-      var subjectGivenName = subject.GN || subject.givenName;
-      var subjectSurname = subject.SN || subject.surname;
+      var subjectGivenName = subject.GN ? subject.GN : req.headers.ssl_client_s_dn_g;
+      var subjectSurname = subject.SN ? subject.SN : req.headers.ssl_client_s_dn_s;
       var firstName = subjectGivenName.charAt(0).toUpperCase() + subjectGivenName.slice(1).toLowerCase();
       var lastName = subjectSurname.charAt(0).toUpperCase() + subjectSurname.slice(1).toLowerCase();
       var userName = firstName + ' ' + lastName;
