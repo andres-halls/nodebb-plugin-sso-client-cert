@@ -5,6 +5,7 @@ NodeBB Plugin that allows users to login/register via a client certificate.
 ## Limitations
 
 * Requires modifying NodeBB code a bit in order to work (one or two lines) if using Node for TLS termination.
+* Cannot be configured from Admin Control Panel.
 
 ## Installation
 
