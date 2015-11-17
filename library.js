@@ -9,6 +9,7 @@
       nconf = module.parent.require('nconf'),
       async = module.parent.require('async'),
       winston = module.parent.require('winston'),
+      changeCase = require('change-case'),
       fs = require('fs'),
       openssl = require('openssl-wrapper');
 
@@ -67,8 +68,8 @@
 
       var subjectGivenName = subject.GN ? subject.GN : req.headers.ssl_client_s_dn_g;
       var subjectSurname = subject.SN ? subject.SN : req.headers.ssl_client_s_dn_s;
-      var firstName = subjectGivenName.charAt(0).toUpperCase() + subjectGivenName.slice(1).toLowerCase();
-      var lastName = subjectSurname.charAt(0).toUpperCase() + subjectSurname.slice(1).toLowerCase();
+      var firstName = changeCase.titleCase(subjectGivenName);
+      var lastName = changeCase.titleCase(subjectSurname);
       var userName = firstName + ' ' + lastName;
       var email = "";
 

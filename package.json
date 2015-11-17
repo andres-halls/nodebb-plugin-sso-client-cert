@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/andres-liiver/nodebb-plugin-sso-client-cert#readme",
   "dependencies": {
+    "change-case": "^2.3.0",
     "openssl-wrapper": "^0.2.1",
     "passport-client-cert": "github:andres-liiver/passport-client-cert"
   },
